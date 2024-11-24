@@ -1,10 +1,60 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35506.116 d17.12
+VisualStudioVersion = 17.12.35506.116
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{01D52262-97FD-4072-A74C-E8CDB8F440D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Prediction", "Prediction", "{83EECE2B-A1C7-4642-883D-26FFE73CA23F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prediction.API", "Services\Prediction\Prediction.API\Prediction.API.csproj", "{42758D6B-D271-4C47-BB90-33FEDD344576}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prediction.Domain", "Services\Prediction\Prediction.Domain\Prediction.Domain.csproj", "{4A936322-FEAC-491E-A8B7-83DFCAB20ACE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prediction.Application", "Services\Prediction\Prediction.Application\Prediction.Application.csproj", "{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prediction.Infrastructure", "Services\Prediction\Prediction.Infrastructure\Prediction.Infrastructure.csproj", "{78694BD3-DD2D-47D5-BDBD-9830D591D224}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{C9568FBA-A6BD-4B88-A268-A7CD874FBEC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingBlocks", "BuildingBlocks\BuildingBlocks\BuildingBlocks.csproj", "{EDD03D87-BCE5-4491-BBA8-0144BBB29C84}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42758D6B-D271-4C47-BB90-33FEDD344576}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42758D6B-D271-4C47-BB90-33FEDD344576}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42758D6B-D271-4C47-BB90-33FEDD344576}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42758D6B-D271-4C47-BB90-33FEDD344576}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A936322-FEAC-491E-A8B7-83DFCAB20ACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A936322-FEAC-491E-A8B7-83DFCAB20ACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A936322-FEAC-491E-A8B7-83DFCAB20ACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A936322-FEAC-491E-A8B7-83DFCAB20ACE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78694BD3-DD2D-47D5-BDBD-9830D591D224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78694BD3-DD2D-47D5-BDBD-9830D591D224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78694BD3-DD2D-47D5-BDBD-9830D591D224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78694BD3-DD2D-47D5-BDBD-9830D591D224}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDD03D87-BCE5-4491-BBA8-0144BBB29C84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDD03D87-BCE5-4491-BBA8-0144BBB29C84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDD03D87-BCE5-4491-BBA8-0144BBB29C84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDD03D87-BCE5-4491-BBA8-0144BBB29C84}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{83EECE2B-A1C7-4642-883D-26FFE73CA23F} = {01D52262-97FD-4072-A74C-E8CDB8F440D1}
+		{42758D6B-D271-4C47-BB90-33FEDD344576} = {83EECE2B-A1C7-4642-883D-26FFE73CA23F}
+		{4A936322-FEAC-491E-A8B7-83DFCAB20ACE} = {83EECE2B-A1C7-4642-883D-26FFE73CA23F}
+		{D7FB10F5-BC05-4A1F-B3C9-67211C7A3FB6} = {83EECE2B-A1C7-4642-883D-26FFE73CA23F}
+		{78694BD3-DD2D-47D5-BDBD-9830D591D224} = {83EECE2B-A1C7-4642-883D-26FFE73CA23F}
+		{EDD03D87-BCE5-4491-BBA8-0144BBB29C84} = {C9568FBA-A6BD-4B88-A268-A7CD874FBEC9}
 	EndGlobalSection
 EndGlobal

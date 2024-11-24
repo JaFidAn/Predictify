@@ -1,0 +1,12 @@
+﻿global using BuildingBlocks.CQRS;
+global using FluentValidation;
+global using Prediction.Application.Dtos;
+global using Microsoft.Extensions.Logging;
+global using Prediction.Application.Data;
+global using Prediction.Application.Exceptions;
+global using Prediction.Domain.Models;
+global using Prediction.Domain.ValueObjects;
+global using BuildingBlocks.Exceptions;
+global using BuildingBlocks.Pagination;
+global using Microsoft.EntityFrameworkCore;
+global using Prediction.Application.Extensions;
