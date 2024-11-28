@@ -88,27 +88,21 @@ namespace Prediction.Application.Extensions
                 return Enumerable.Empty<OutcomeTypeId>();
             }
 
-            var outcomeTypes = await context.OutcomeTypes.ToListAsync(cancellationToken);
-            var outcomeTypeMap = outcomeTypes.ToDictionary(
-                ot => ot.Name,
-                ot => OutcomeTypeId.Of(ot.Id.Value)
-            );
-
-            if (!outcomeTypeMap.ContainsKey("Win") || !outcomeTypeMap.ContainsKey("Loss") ||
-                !outcomeTypeMap.ContainsKey("Draw") || !outcomeTypeMap.ContainsKey("Over_2_5") ||
-                !outcomeTypeMap.ContainsKey("Under_2_5"))
-            {
-                throw new InvalidOperationException("Required OutcomeTypes are missing from the database.");
-            }
+            // Fetch the outcome type map using the centralized method
+            var outcomeTypeMap = await context.GetOutcomeTypeMapAsync(cancellationToken);
 
             var applicableOutcomes = new List<OutcomeTypeId>();
 
+            // Determine if the given TeamId matches one of the teams in the match
             bool isTeam1 = match.Team1Id == teamId;
             bool isTeam2 = match.Team2Id == teamId;
 
             if (!isTeam1 && !isTeam2)
+            {
                 throw new DomainException("The given TeamId does not match Team1Id or Team2Id in the match.");
+            }
 
+            // Determine Win, Loss, or Draw
             if (match.Team1Goals.Value > match.Team2Goals.Value)
             {
                 applicableOutcomes.Add(isTeam1 ? outcomeTypeMap["Win"] : outcomeTypeMap["Loss"]);
@@ -122,7 +116,8 @@ namespace Prediction.Application.Extensions
                 applicableOutcomes.Add(outcomeTypeMap["Draw"]);
             }
 
-            var totalGoals = (match.Team1Goals ?? 0) + (match.Team2Goals ?? 0);
+            // Determine Over_2_5 or Under_2_5
+            var totalGoals = match.Team1Goals.Value + match.Team2Goals.Value;
             applicableOutcomes.Add(totalGoals > 2.5 ? outcomeTypeMap["Over_2_5"] : outcomeTypeMap["Under_2_5"]);
 
             return applicableOutcomes;

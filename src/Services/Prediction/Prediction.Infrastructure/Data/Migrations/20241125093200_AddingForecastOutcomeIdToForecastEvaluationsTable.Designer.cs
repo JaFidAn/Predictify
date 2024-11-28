@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Prediction.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Prediction.Infrastructure.Data;
 namespace Prediction.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241125093200_AddingForecastOutcomeIdToForecastEvaluationsTable")]
+    partial class AddingForecastOutcomeIdToForecastEvaluationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,6 +90,9 @@ namespace Prediction.Infrastructure.Data.Migrations
             modelBuilder.Entity("Prediction.Domain.Models.ForecastEvaluation", b =>
                 {
                     b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ActualOutcomeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("ConfidenceScore")

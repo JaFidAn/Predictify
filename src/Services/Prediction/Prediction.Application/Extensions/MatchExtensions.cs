@@ -36,42 +36,35 @@ namespace Prediction.Application.Extensions
             }
         }
 
-        public static async Task<IEnumerable<OutcomeTypeId>> DetermineOutcomesAsync(this Match match,IApplicationDbContext context,
-            CancellationToken cancellationToken)
+        public static async Task<IEnumerable<OutcomeTypeId>> DetermineOutcomesAsync(this Match match, IApplicationDbContext context, CancellationToken cancellationToken)
         {
             if (!match.IsCompleted)
-                throw new DomainException("Cannot determine outcomes for an incomplete match.");
-
-            // Fetch outcome types from the database dynamically
-            var outcomeTypes = await context.OutcomeTypes.ToListAsync(cancellationToken);
-
-            var outcomeTypeMap = outcomeTypes.ToDictionary(
-                ot => ot.Name,
-                ot => OutcomeTypeId.Of(ot.Id.Value)
-            );
-
-            var requiredKeys = new[] { "Win", "Loss", "Draw", "Over_2_5", "Under_2_5" };
-            foreach (var key in requiredKeys)
             {
-                if (!outcomeTypeMap.ContainsKey(key))
-                    throw new DomainException($"Outcome type '{key}' is missing from the database.");
+                throw new DomainException("Cannot determine outcomes for an incomplete match.");
             }
+
+            // Fetch the outcome type map using the centralized method
+            var outcomeTypeMap = await context.GetOutcomeTypeMapAsync(cancellationToken);
 
             var outcomes = new List<OutcomeTypeId>();
 
+            // Determine Win, Loss, or Draw
             if (match.Team1Goals > match.Team2Goals)
+            {
                 outcomes.Add(outcomeTypeMap["Win"]);
+            }
             else if (match.Team1Goals < match.Team2Goals)
+            {
                 outcomes.Add(outcomeTypeMap["Loss"]);
+            }
             else
+            {
                 outcomes.Add(outcomeTypeMap["Draw"]);
+            }
 
+            // Determine Over_2_5 or Under_2_5
             int totalGoals = match.Team1Goals.Value + match.Team2Goals.Value;
-
-            if (totalGoals > 2.5)
-                outcomes.Add(outcomeTypeMap["Over_2_5"]);
-            else
-                outcomes.Add(outcomeTypeMap["Under_2_5"]);
+            outcomes.Add(totalGoals > 2.5 ? outcomeTypeMap["Over_2_5"] : outcomeTypeMap["Under_2_5"]);
 
             return outcomes;
         }

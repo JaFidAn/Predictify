@@ -1,4 +1,6 @@
-﻿namespace Prediction.Application.Extensions
+﻿using Prediction.Domain.Exceptions;
+
+namespace Prediction.Application.Extensions
 {
     public static class ForecastExtensions
     {
@@ -56,14 +58,14 @@
                     var confidence = CalculateOutcomeConfidence(team1Streak, team2Streak);
                     return new { OutcomeTypeId = outcomeType.Id, Confidence = confidence };
                 })
-                .ToDictionary(x => x.OutcomeTypeId, x => x.Confidence);
+                .ToList();
 
             // Determine the outcome type with the highest confidence
-            var (selectedOutcomeType, maxConfidence) = outcomeConfidences
-                .OrderByDescending(c => c.Value)
+            var mostConfidentOutcome = outcomeConfidences
+                .OrderByDescending(c => c.Confidence)
                 .FirstOrDefault();
 
-            if (selectedOutcomeType == null)
+            if (mostConfidentOutcome == null || mostConfidentOutcome.Confidence == 0)
             {
                 logger.LogWarning("No valid outcome type selected for MatchId: {MatchId}.", match.Id.Value);
                 return;
@@ -73,15 +75,15 @@
             var forecast = Forecast.Create(
                 ForecastId.Of(Guid.NewGuid()),
                 MatchId.Of(match.Id.Value),
-                OutcomeTypeId.Of(selectedOutcomeType.Value),
-                maxConfidence
+                mostConfidentOutcome.OutcomeTypeId,
+                mostConfidentOutcome.Confidence
             );
 
             context.Forecasts.Add(forecast);
             await context.SaveChangesAsync(cancellationToken);
 
-            logger.LogInformation("Forecast created for MatchId: {MatchId} with OutcomeTypeId: {OutcomeTypeId} and Confidence: {Confidence}",
-                match.Id.Value, selectedOutcomeType.Value, maxConfidence);
+            logger.LogInformation("Forecast created for MatchId: {MatchId} with OutcomeTypeId: {OutcomeTypeId} and Confidence: {Confidence}.",
+                match.Id.Value, mostConfidentOutcome.OutcomeTypeId.Value, mostConfidentOutcome.Confidence);
         }
 
         private static decimal CalculateOutcomeConfidence((int CurrentStreak, int MaxStreak) team1Streak, (int CurrentStreak, int MaxStreak) team2Streak)
@@ -104,8 +106,8 @@
                 return;
             }
 
-            // Fetch the actual outcome based on match results
-            var actualOutcome = await match.DetermineActualOutcomeAsync(context, cancellationToken);
+            // Fetch the actual outcomes based on match results using the context
+            var actualOutcomes = await context.DetermineActualOutcomesAsync(match, cancellationToken);
 
             // Fetch the forecast for this match
             var forecast = await context.Forecasts
@@ -128,11 +130,14 @@
             }
 
             // Evaluate the forecast
-            var wasCorrect = forecast.OutcomeTypeId == actualOutcome;
+            var wasCorrect = actualOutcomes.Contains(forecast.OutcomeTypeId);
+
+            // Create the ForecastEvaluation
             var forecastEvaluation = ForecastEvaluation.Create(
                 ForecastEvaluationId.Of(Guid.NewGuid()),
                 forecast.Id,
-                actualOutcome,
+                forecast.MatchId,
+                forecast.OutcomeTypeId,
                 forecast.Confidence,
                 wasCorrect
             );
@@ -148,29 +153,18 @@
             logger.LogInformation("Forecast evaluation completed for MatchId: {MatchId}. WasCorrect: {WasCorrect}", match.Id.Value, wasCorrect);
         }
 
-        public static async Task<OutcomeTypeId> DetermineActualOutcomeAsync(this Match match, IApplicationDbContext context, CancellationToken cancellationToken)
+        public static async Task<IEnumerable<OutcomeTypeId>> DetermineActualOutcomesAsync(this IApplicationDbContext context, Match match, CancellationToken cancellationToken)
         {
-            // Fetch outcome types
-            var outcomeTypes = await context.OutcomeTypes.ToListAsync(cancellationToken);
+            if (!match.IsCompleted)
+                throw new DomainException("Cannot determine outcomes for an incomplete match.");
 
-            var outcomeTypeMap = outcomeTypes.ToDictionary(
-                ot => ot.Name,
-                ot => OutcomeTypeId.Of(ot.Id.Value)
-            );
+            // Fetch outcomes from the MatchOutcomeTypes table for the given MatchId
+            var outcomes = await context.MatchOutcomeTypes
+                .Where(mo => mo.MatchId == match.Id)
+                .Select(mo => mo.OutcomeTypeId)
+                .ToListAsync(cancellationToken);
 
-            // Determine the actual outcome
-            if (match.Team1Goals > match.Team2Goals)
-            {
-                return outcomeTypeMap["Win"];
-            }
-            else if (match.Team1Goals < match.Team2Goals)
-            {
-                return outcomeTypeMap["Loss"];
-            }
-            else
-            {
-                return outcomeTypeMap["Draw"];
-            }
+            return outcomes;
         }
 
         public static async Task<List<ForecastDto>> ToForecastDtoListAsync(this IQueryable<Forecast> forecasts, IApplicationDbContext context, CancellationToken cancellationToken)

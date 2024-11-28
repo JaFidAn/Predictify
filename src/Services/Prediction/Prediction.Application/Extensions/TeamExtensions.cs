@@ -113,5 +113,49 @@
                 sr => (sr.CurrentStreak, sr.MaxStreak > 0 ? sr.MaxStreak : 1) // Ensure MaxStreak is at least 1
             );
         }
+
+        public static IQueryable<TeamsWithMaxStreaksDto> TeamsWithMaxStreaksToDto(this IQueryable<Team> teams, IApplicationDbContext context)
+        {
+            // Determine the current season dynamically
+            var currentSeasonId = context.Seasons
+                .OrderByDescending(s => s.EndDate)
+                .Select(s => s.Id)
+                .FirstOrDefault();
+
+            if (currentSeasonId == default)
+            {
+                throw new Exception("No current season found."); // Handle cases where no seasons exist
+            }
+
+            return teams
+                .Join(
+                    context.StreakRecords,
+                    team => team.Id,
+                    streak => streak.TeamId,
+                    (team, streak) => new { team, streak }
+                )
+                .Join(
+                    context.OutcomeTypes,
+                    combined => combined.streak.OutcomeTypeId,
+                    outcomeType => outcomeType.Id,
+                    (combined, outcomeType) => new { combined.team, combined.streak, outcomeType }
+                )
+                .Join(
+                    context.TeamLeagueSeasons,
+                    combined => combined.team.Id,
+                    tls => tls.TeamId,
+                    (combined, tls) => new { combined.team, combined.streak, combined.outcomeType, tls }
+                )
+                .Where(joined => joined.tls.SeasonId == currentSeasonId) // Filter by the determined current season
+                .Where(joined => joined.streak.CurrentStreak == joined.streak.MaxStreak)
+                .Where(joined => joined.streak.CurrentStreak >= 5)
+                .Select(joined => new TeamsWithMaxStreaksDto
+                {
+                    TeamName = joined.team.Name,
+                    OutcomeTypeName = joined.outcomeType.Name, // Assuming OutcomeType has a Name property
+                    CurrentStreak = joined.streak.CurrentStreak,
+                    MaxStreak = joined.streak.MaxStreak
+                });
+        }
     }
 }

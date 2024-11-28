@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Prediction.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using Prediction.Infrastructure.Data;
 namespace Prediction.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241125063908_AddingMatchIdToForecastEvaluationsTable")]
+    partial class AddingMatchIdToForecastEvaluationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,6 +92,9 @@ namespace Prediction.Infrastructure.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ActualOutcomeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<decimal>("ConfidenceScore")
                         .HasPrecision(3, 2)
                         .HasColumnType("decimal(3,2)");
@@ -100,9 +106,6 @@ namespace Prediction.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ForecastId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ForecastOutcomeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("LastModifiedAt")

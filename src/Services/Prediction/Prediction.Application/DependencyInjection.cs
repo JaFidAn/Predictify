@@ -1,13 +1,15 @@
 ﻿using BuildingBlocks.Behaviors;
 using BuildingBlocks.Exceptions.Handler;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Prediction.Application.Configurations;
 using System.Reflection;
 
 namespace Prediction.Application
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddMediatR(config =>
             {
@@ -20,6 +22,8 @@ namespace Prediction.Application
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             services.AddExceptionHandler<CustomExceptionHandler>();
+
+            services.Configure<DataSettings>(configuration.GetSection("DataSettings"));
 
             return services;
         }
